@@ -31,7 +31,7 @@ export class UsersService {
       return user;
     }
 
-    updtae(id: string, updateUserDto: updateUserDto): User {
+    update(id: string, updateUserDto: updateUserDto): User {
       const user = this.findOne(id);
       Object.assign(user, updateUserDto);
       return user;
