@@ -1,39 +1,92 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { User } from '../entities/user.entity';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private jwtService: JwtService,
+  ) {}
 
-  login(loginDto: LoginDto) {
-    // Mock user for now - will be replaced with DB later
-    const mockUser = {
-      id: '1',
-      email: 'test@test.com',
-      password: '$2b$10$examplehashedpassword',
-    };
+  async login(loginDto: LoginDto) {
+  const { email, password } = loginDto;
+  const user = await this.userRepository.findOne({ where: { email } });
 
-    // For demo, accept any credentials
-    if (loginDto.email === 'test@test.com' && loginDto.password === '123') {
-      const payload = { email: mockUser.email, sub: mockUser.id };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
-    }
-
+  if (!user) {
     throw new UnauthorizedException('Invalid credentials');
   }
 
-  forgotPassword() {
-    return { message: 'OTP sent to email' };
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new UnauthorizedException('Invalid credentials');
   }
 
-  verifyOtp() {
-    return { message: 'OTP verified' };
+  const payload = { email: user.email, sub: user.id };
+  return {
+    access_token: this.jwtService.sign(payload),
+  };
+}
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const { email } = forgotPasswordDto;
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date();
+    otpExpiry.setMinutes(otpExpiry.getMinutes() + 10);
+
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await this.userRepository.save(user);
+
+    return { message: 'OTP sent to your email', otp };
   }
 
-  resetPassword() {
+  async verifyOtp(verifyOtpDto: VerifyOtpDto) {
+    const { email, otp } = verifyOtpDto;
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (!user.otp || user.otp !== otp) {
+      throw new UnauthorizedException('Invalid OTP');
+    }
+
+    if (!user.otpExpiry || new Date() > user.otpExpiry) {
+      throw new UnauthorizedException('OTP expired');
+    }
+
+    return { message: 'OTP verified successfully' };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { email, newPassword } = resetPasswordDto;
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await this.userRepository.save(user);
+
     return { message: 'Password reset successfully' };
   }
 }
