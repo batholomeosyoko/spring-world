@@ -1,11 +1,12 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -19,6 +20,15 @@ export class User {
   @Column()
   password!: string;
 
+  @Column({ nullable: true })
+  otp!: string;
+
+  @Column({ nullable: true })
+  otpExpiry!: Date;
+
   @CreateDateColumn()
   createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }

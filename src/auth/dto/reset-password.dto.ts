@@ -1,4 +1,4 @@
 export class ResetPasswordDto {
-  email: string;
-  newPassword: string;
+  email!: string;
+  newPassword!: string;
 }

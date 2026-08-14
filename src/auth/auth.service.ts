@@ -3,7 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from '../entities/user.entity';
+import { User } from '../users/entities/user.entity';
+import { MailService } from '../mail/mail.service';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -15,6 +16,7 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -45,7 +47,8 @@ export class AuthService {
     user.otp = otp;
     user.otpExpiry = otpExpiry;
     await this.userRepository.save(user);
-    return { message: 'OTP sent to your email', otp };
+    await this.mailService.sendOtpEmail(email, otp);
+    return { message: 'OTP sent to your email' };
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto) {
