@@ -9,26 +9,26 @@ import {
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
 
   @Column({ unique: true })
-  email!: string;
+  email: string;
 
   @Column()
-  name!: string;
-
-  @Column()
-  password!: string;
+  password: string;
 
   @Column({ nullable: true })
-  otp!: string;
+  name: string;
 
-  @Column({ nullable: true })
-  otpExpiry!: Date;
+  @Column({ nullable: true, type: 'varchar' })
+  otp: string | null;
+
+  @Column({ nullable: true, type: 'timestamp' })
+  otpExpiry: Date | null;
 
   @CreateDateColumn()
-  createdAt!: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt!: Date;
+  updatedAt: Date;
 }

@@ -63,6 +63,12 @@ export class AuthService {
     if (!user.otpExpiry || new Date() > user.otpExpiry) {
       throw new UnauthorizedException('OTP expired');
     }
+
+    // Clear OTP after successful verification
+    user.otp = null;
+    user.otpExpiry = null;
+    await this.userRepository.save(user);
+
     return { message: 'OTP verified successfully' };
   }
 
