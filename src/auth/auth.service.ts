@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from '../entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -49,19 +49,25 @@ export class AuthService {
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto) {
-    const { email, otp } = verifyOtpDto;
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-    if (!user.otp || user.otp !== otp) {
-      throw new UnauthorizedException('Invalid OTP');
-    }
-    if (!user.otpExpiry || new Date() > user.otpExpiry) {
-      throw new UnauthorizedException('OTP expired');
-    }
-    return { message: 'OTP verified successfully' };
+  const { email, otp } = verifyOtpDto;
+  const user = await this.userRepository.findOne({ where: { email } });
+  if (!user) {
+    throw new UnauthorizedException('User not found');
   }
+  if (!user.otp || user.otp !== otp) {
+    throw new UnauthorizedException('Invalid OTP');
+  }
+  if (!user.otpExpiry || new Date() > user.otpExpiry) {
+    throw new UnauthorizedException('OTP expired');
+  }
+  
+  // Clear OTP after successful verification
+  user.otp = null;
+  user.otpExpiry = null;
+  await this.userRepository.save(user);
+  
+  return { message: 'OTP verified successfully' };
+}
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
     const { email, newPassword } = resetPasswordDto;
