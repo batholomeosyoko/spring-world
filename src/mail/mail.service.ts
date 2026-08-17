@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
+  private readonly logger = new Logger(MailService.name);
   private transporter: nodemailer.Transporter;
 
   constructor(private config: ConfigService) {
@@ -19,12 +20,16 @@ export class MailService {
   }
 
   async sendOtpEmail(to: string, otp: string) {
-    await this.transporter.sendMail({
-      from: this.config.get('EMAIL_FROM'),
-      to,
-      subject: 'Your password reset code',
-      text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
-      html: `<p>Your OTP code is <b>${otp}</b>. It expires in 10 minutes.</p>`,
-    });
+    try {
+      await this.transporter.sendMail({
+        from: this.config.get('EMAIL_FROM'),
+        to,
+        subject: 'Your password reset code',
+        text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
+        html: `<p>Your OTP code is <b>${otp}</b>. It expires in 10 minutes.</p>`,
+      });
+    } catch (err) {
+      this.logger.error(`Failed to send OTP email to ${to}: ${err.message}`);
+    }
   }
 }
