@@ -6,7 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { User } from '../users/entities/user.entity';
 import { MailModule } from '../mail/mail.module';
 
