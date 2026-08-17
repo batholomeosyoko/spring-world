@@ -22,6 +22,13 @@ export class User {
   @Column({ nullable: true })
   name: string;
 
+  @Column({
+    type: 'enum',
+    enum: ['admin', 'user'],
+    default: 'user',
+  })
+  role: 'admin' | 'user';
+
   @Column({ nullable: true, type: 'varchar' })
   @Exclude()
   otp: string | null;
