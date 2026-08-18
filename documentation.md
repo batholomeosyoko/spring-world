@@ -39,6 +39,38 @@ ERROR (401): {
   "statusCode": 401
 }
 
+=======> Login Admin roles(Email/Password)
+METHOD: POST
+URL: /auth/login
+ACCESS: Public
+DESCRIPTION: Validates email and password, returns JWT access token with user details.
+Token expiry is controlled by `JWT_EXPIRES_IN` (default 1 hour).
+
+**Pre-configured Admin Accounts:**
+The following admin accounts are available for testing:
+
+| Email | Password | Role |
+|-------|----------|------|
+| `frankmayala072@gmail.com` | `newSecure789` | `admin` |
+| `john@example.com` | `password123` | `admin` |
+
+**Request Body:**
+{
+  "email": "frankmayala072@gmail.com",
+  "password": "newSecure789"
+}
+
+**Response (200 OK):**
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "...",
+    "email": "frankmayala072@gmail.com",
+    "name": "Frank",
+    "role": "admin"
+  }
+}
+
 =======> Google OAuth Login
 METHOD: GET
 URL: /auth/google
