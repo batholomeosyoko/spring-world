@@ -15,9 +15,9 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true, type: 'varchar' })
   @Exclude()
-  password: string;
+  password: string | null;
 
   @Column({ nullable: true })
   name: string;
@@ -28,6 +28,9 @@ export class User {
     default: 'user',
   })
   role: 'admin' | 'user';
+
+  @Column({ nullable: true, unique: true, type: 'varchar' })
+  googleId: string | null;
 
   @Column({ nullable: true, type: 'varchar' })
   @Exclude()
