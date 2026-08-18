@@ -26,11 +26,37 @@ JSON: {
   "password": "your-password"
 }
 RESPONSE: {
-  "access_token": "eyJhbGciOiJIUzI1NiIs..."
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "email": "admin@example.com",
+    "name": "Admin User",
+    "role": "admin"
+  }
 }
 ERROR (401): {
   "message": "Invalid credentials",
   "statusCode": 401
+}
+
+=======> Google OAuth Login
+METHOD: GET
+URL: /auth/google
+ACCESS: Public
+DESCRIPTION: Initiates Google OAuth login flow. Redirects to Google's consent screen.
+After authentication, Google redirects to `/auth/google/callback` which returns a JWT.
+
+**Usage:** Visit `http://localhost:4000/auth/google` in your browser.
+
+**Response (after callback):**
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "email": "user@gmail.com",
+    "name": "Google User",
+    "role": "user"
+  }
 }
 
 
@@ -87,7 +113,14 @@ JSON: {
   "newPassword": "new-secure-password"
 }
 RESPONSE: {
-  "message": "Password reset successfully"
+  "message": "Password reset successfully",
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "email": "admin@example.com",
+    "name": "Admin User",
+    "role": "admin"
+  }
 }
 ERROR (401): {
   "message": "User not found",
@@ -273,6 +306,11 @@ EMAIL_USER=your_real_gmail_address@gmail.com
 EMAIL_PASSWORD=your_16_char_app_password_no_spaces
 EMAIL_FROM=your_real_gmail_address@gmail.com
 
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:4000/auth/google/callback
+
 # CORS
 CORS_ORIGIN=http://localhost:3000
 ```
@@ -293,3 +331,4 @@ CORS_ORIGIN=http://localhost:3000
 - New signups always get role "user". There is currently no public
   self-service way to become an admin — an existing admin must promote
   the account via PATCH /users/:id/role.
+- **NEW:** Google OAuth available at `/auth/google`. Users can sign in with their Google account.
